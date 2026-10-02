@@ -4871,6 +4871,11 @@ body.spx-preview-with-nav:not(.spx-template-home):not(.spx-gallery-page) {
   border-color: var(--spx-primary);
 }
 
+.spx-pda-page[data-prd-prototype="cross-check"] .spx-cc-pin-input.is-text {
+  letter-spacing: normal;
+  text-transform: none;
+}
+
 .spx-pda-page[data-prd-prototype="cross-check"] .spx-cc-pin-input.is-error {
   border-color: var(--spx-error);
   background: var(--spx-error-bg);

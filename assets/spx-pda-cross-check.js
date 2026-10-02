@@ -68,6 +68,8 @@
     overlay: null,
     alert: null,
     alertError: "",
+    emailValue: "",
+    emailError: "",
     pinValue: "",
     pinError: "",
     toast: null,
@@ -113,6 +115,7 @@
     },
     "closure-error"() {
       seeds.closure();
+      model.emailValue = "supervisor.sp6@shopee.com";
       model.pinValue = "135790";
       model.pinError = "Incorrect supervisor PIN. Try again.";
     },
@@ -302,13 +305,18 @@
 
   const closureSheet = () => {
     const count = model.pendencies.length;
-    const ready = model.pinValue.length === 6;
+    const ready = model.pinValue.length === 6 && /.+@.+\..+/.test(model.emailValue);
     return `<div class="spx-overlay" data-component="Modal" data-cc-overlay="closure">
       <section class="spx-bottom-sheet is-cross-check-sheet is-closure" data-component="BottomSheet" data-module="TOClosurePendencyRelease" role="dialog" aria-labelledby="cc-closure-title">
         <header class="spx-sheet-header"><h2 class="spx-sheet-title" id="cc-closure-title">Close TO</h2><button class="ssc-navbar-action" data-component="Button" data-action="keep-packing" aria-label="Close">${icon("IconCloseOutline", 24)}</button></header>
         <div class="spx-sheet-body">
           <div class="spx-cc-banner" role="note">${icon("IconInfoOutline", 16)}<span>${count} Cross-Check ${count === 1 ? "pendency" : "pendencies"} must be released by a supervisor before ${TO_NUMBER} can be packed.</span></div>
           ${model.pendencies.map(pendencyCard).join("")}
+          <label class="spx-cc-pin" data-component="Input">
+            <span class="spx-cc-pin-label">Supervisor email<span class="spx-required">*</span></span>
+            <input class="spx-cc-pin-input is-text${model.emailError ? " is-error" : ""}" type="email" inputmode="email" autocomplete="off" placeholder="name@shopee.com" data-input="email" value="${model.emailValue}" aria-invalid="${model.emailError ? "true" : "false"}" aria-describedby="cc-email-helper">
+            <span class="spx-cc-helper${model.emailError ? " is-error" : ""}" id="cc-email-helper">${model.emailError || "Both the supervisor email and PIN are recorded in the release log."}</span>
+          </label>
           <label class="spx-cc-pin" data-component="Input">
             <span class="spx-cc-pin-label">Supervisor PIN<span class="spx-required">*</span></span>
             <input class="spx-cc-pin-input${model.pinError ? " is-error" : ""}" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="off" placeholder="Enter 6-digit PIN" data-input="pin" value="${model.pinValue}" aria-invalid="${model.pinError ? "true" : "false"}" aria-describedby="cc-pin-helper">
@@ -391,7 +399,7 @@
   const render = (focusTarget) => {
     root.innerHTML = model.view === "result" ? resultScreen() : operationScreen();
     bind();
-    const target = focusTarget || (model.overlay === "alert" ? "rescan" : model.overlay === "closure" ? "pin" : model.overlay ? null : "scan");
+    const target = focusTarget || (model.overlay === "alert" ? "rescan" : model.overlay === "closure" ? "email" : model.overlay ? null : "scan");
     if (target) root.querySelector(`[data-input="${target}"]`)?.focus({ preventScroll: true });
     if (model.toast && !model.toastSticky) {
       clearTimeout(toastTimer);
@@ -489,6 +497,8 @@
     model.toast = null;
     if (model.pendencies.length) {
       model.overlay = "closure";
+      model.emailValue = "";
+      model.emailError = "";
       model.pinValue = "";
       model.pinError = "";
       return render();
@@ -499,6 +509,11 @@
   };
 
   const release = () => {
+    if (!/.+@.+\..+/.test(model.emailValue)) {
+      model.emailError = "Enter the supervisor email.";
+      return render("email");
+    }
+    model.emailError = "";
     if (model.pinValue !== SUPERVISOR_PIN) {
       model.pinError = "Incorrect supervisor PIN. Try again.";
       model.pinValue = "";
@@ -509,6 +524,7 @@
     model.packages = model.packages.map((item) => ({ id: item.id }));
     model.overlay = null;
     model.pinError = "";
+    model.emailError = "";
     model.view = "result";
     model.completedTime = timestamp();
     render(null);
@@ -516,6 +532,8 @@
 
   const keepPacking = () => {
     model.overlay = null;
+    model.emailValue = "";
+    model.emailError = "";
     model.pinValue = "";
     model.pinError = "";
     showToast("IconNoticeColored", "TO remains in Packing");
@@ -589,13 +607,26 @@
       if (event.key === "Enter") confirmRescan(event.currentTarget.value.trim().toUpperCase() || model.alert.id);
     });
 
+    const syncRelease = () => {
+      const releaseButton = root.querySelector('[data-action="release"]');
+      if (releaseButton) releaseButton.disabled = !(model.pinValue.length === 6 && /.+@.+\..+/.test(model.emailValue));
+    };
+
+    const emailInput = root.querySelector('[data-input="email"]');
+    emailInput?.addEventListener("input", (event) => {
+      model.emailValue = event.currentTarget.value.trim();
+      syncRelease();
+    });
+    emailInput?.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") root.querySelector('[data-input="pin"]')?.focus();
+    });
+
     const pinInput = root.querySelector('[data-input="pin"]');
     pinInput?.addEventListener("input", (event) => {
       const digits = event.currentTarget.value.replace(/\D/g, "").slice(0, 6);
       event.currentTarget.value = digits;
       model.pinValue = digits;
-      const releaseButton = root.querySelector('[data-action="release"]');
-      if (releaseButton) releaseButton.disabled = digits.length !== 6;
+      syncRelease();
     });
     pinInput?.addEventListener("keydown", (event) => {
       if (event.key === "Enter" && model.pinValue.length === 6) release();
