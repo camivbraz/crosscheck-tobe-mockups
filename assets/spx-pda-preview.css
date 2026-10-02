@@ -4876,6 +4876,30 @@ body.spx-preview-with-nav:not(.spx-template-home):not(.spx-gallery-page) {
   text-transform: none;
 }
 
+.spx-pda-page[data-prd-prototype="cross-check"] .spx-cc-pendency-rows {
+  border: 1px solid #E5E7EB;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.spx-pda-page[data-prd-prototype="cross-check"] .spx-cc-pendency-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 12px;
+  font-size: 13px;
+}
+
+.spx-pda-page[data-prd-prototype="cross-check"] .spx-cc-pendency-row + .spx-cc-pendency-row {
+  border-top: 1px solid #F1F2F4;
+}
+
+.spx-pda-page[data-prd-prototype="cross-check"] .spx-cc-pendency-row span {
+  color: var(--spx-text-secondary, #6B7280);
+  font-size: 12px;
+}
+
 .spx-pda-page[data-prd-prototype="cross-check"] .spx-cc-pin-input.is-error {
   border-color: var(--spx-error);
   background: var(--spx-error-bg);

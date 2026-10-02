@@ -303,6 +303,12 @@
       </section>
     </div>`;
 
+  const pendencyRow = (entry) => `
+    <div class="spx-cc-pendency-row">
+      <strong>${entry.id}</strong>
+      <span>${entry.destination}</span>
+    </div>`;
+
   const closureSheet = () => {
     const count = model.pendencies.length;
     const ready = model.pinValue.length === 6 && /.+@.+\..+/.test(model.emailValue);
@@ -310,17 +316,17 @@
       <section class="spx-bottom-sheet is-cross-check-sheet is-closure" data-component="BottomSheet" data-module="TOClosurePendencyRelease" role="dialog" aria-labelledby="cc-closure-title">
         <header class="spx-sheet-header"><h2 class="spx-sheet-title" id="cc-closure-title">Close TO</h2><button class="ssc-navbar-action" data-component="Button" data-action="keep-packing" aria-label="Close">${icon("IconCloseOutline", 24)}</button></header>
         <div class="spx-sheet-body">
-          <div class="spx-cc-banner" role="note">${icon("IconInfoOutline", 16)}<span>${count} Cross-Check ${count === 1 ? "pendency" : "pendencies"} must be released by a supervisor before ${TO_NUMBER} can be packed.</span></div>
-          ${model.pendencies.map(pendencyCard).join("")}
+          <div class="spx-cc-banner" role="note">${icon("IconInfoOutline", 16)}<span>${count} Cross-Check ${count === 1 ? "pendency" : "pendencies"} need supervisor release before this TO can be packed.</span></div>
+          <div class="spx-cc-pendency-rows">${model.pendencies.map(pendencyRow).join("")}</div>
           <label class="spx-cc-pin" data-component="Input">
             <span class="spx-cc-pin-label">Supervisor email<span class="spx-required">*</span></span>
             <input class="spx-cc-pin-input is-text${model.emailError ? " is-error" : ""}" type="email" inputmode="email" autocomplete="off" placeholder="name@shopee.com" data-input="email" value="${model.emailValue}" aria-invalid="${model.emailError ? "true" : "false"}" aria-describedby="cc-email-helper">
-            <span class="spx-cc-helper${model.emailError ? " is-error" : ""}" id="cc-email-helper">${model.emailError || "Both the supervisor email and PIN are recorded in the release log."}</span>
+${model.emailError ? `<span class="spx-cc-helper is-error" id="cc-email-helper">${model.emailError}</span>` : ""}
           </label>
           <label class="spx-cc-pin" data-component="Input">
             <span class="spx-cc-pin-label">Supervisor PIN<span class="spx-required">*</span></span>
             <input class="spx-cc-pin-input${model.pinError ? " is-error" : ""}" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="off" placeholder="Enter 6-digit PIN" data-input="pin" value="${model.pinValue}" aria-invalid="${model.pinError ? "true" : "false"}" aria-describedby="cc-pin-helper">
-            <span class="spx-cc-helper${model.pinError ? " is-error" : ""}" id="cc-pin-helper">${model.pinError || "No supervisor on shift? Keep packing — the TO stays in Packing status."}</span>
+            <span class="spx-cc-helper${model.pinError ? " is-error" : ""}" id="cc-pin-helper">${model.pinError || "No supervisor on shift? Keep Packing — the TO stays in Packing."}</span>
           </label>
         </div>
         <div class="spx-sheet-actions">${button("Keep Packing", { neutral: true, action: "keep-packing" })}${button("Release & Pack", { primary: true, action: "release", disabled: !ready })}</div>
