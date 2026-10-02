@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cross-Check at Scan · PDA Prototype</title>
+  <link rel="stylesheet" href="assets/ssc-mobile-template.css">
+  <link rel="stylesheet" href="assets/spx-pda-preview.css?v=20261002-1">
+</head>
+<body class="spx-gallery-page">
+  <main class="spx-gallery-shell">
+    <header class="spx-gallery-header">
+      <h1 class="spx-gallery-title">Real-time Cross-Check at TO Packing Scan</h1>
+      <p class="spx-gallery-copy">PDA &gt; Packing &gt; Scan package. Cross-Check now runs when the package is scanned, while it is still in the operator's hands; the existing check at TO closure stays. Open any state to run the full flow — every page is interactive (scan field, pop-up, re-scan, dismiss, supervisor PIN).</p>
+    </header>
+    <nav class="spx-gallery-filter" aria-label="Filter states">
+      <button class="ssc-button is-active" data-filter="all">All</button>
+      <button class="ssc-button" data-filter="scan">1 · Scan</button>
+      <button class="ssc-button" data-filter="popup">2 · Pop-up</button>
+      <button class="ssc-button" data-filter="rescan">3 · Re-scan</button>
+      <button class="ssc-button" data-filter="dismiss">4 · Dismiss</button>
+      <button class="ssc-button" data-filter="close">5 · Close TO</button>
+      <button class="ssc-button" data-filter="packed">6 · Packed</button>
+    </nav>
+    <section class="spx-gallery-grid">
+      <article class="spx-gallery-card" data-flow="scan">
+        <div class="spx-gallery-label"><strong>1 · Scan · Scanning — correct destination</strong><span>Package belongs to the TO destination: accepted, operator keeps scanning. No change from today.</span></div>
+        <iframe class="spx-gallery-frame" src="screens/to-packing-scan.html?embed=1&amp;v=20261002-1" title="Scanning — correct destination" loading="lazy"></iframe>
+      </article>
+      <article class="spx-gallery-card" data-flow="popup">
+        <div class="spx-gallery-label"><strong>2 · Cross-Check pop-up · Wrong destination pop-up</strong><span>Raised at scan time. Shows package vs TO destination. Primary: Re-scan Package. Discreet close (×) top-right.</span></div>
+        <iframe class="spx-gallery-frame" src="screens/cross-check-alert.html?embed=1&amp;v=20261002-1" title="Wrong destination pop-up" loading="lazy"></iframe>
+      </article>
+      <article class="spx-gallery-card" data-flow="popup">
+        <div class="spx-gallery-label"><strong>2 · Cross-Check pop-up · Re-scan · different package</strong><span>If a different package is scanned, the pop-up stays and asks for the flagged package.</span></div>
+        <iframe class="spx-gallery-frame" src="screens/cross-check-alert-mismatch.html?embed=1&amp;v=20261002-1" title="Re-scan · different package" loading="lazy"></iframe>
+      </article>
+      <article class="spx-gallery-card" data-flow="rescan">
+        <div class="spx-gallery-label"><strong>3 · Re-scan · Correction confirmed</strong><span>Package did not enter the TO and goes back to the conveyor. No pendency registered.</span></div>
+        <iframe class="spx-gallery-frame" src="screens/cross-check-removed.html?embed=1&amp;v=20261002-1" title="Correction confirmed" loading="lazy"></iframe>
+      </article>
+      <article class="spx-gallery-card" data-flow="dismiss">
+        <div class="spx-gallery-label"><strong>4 · Dismiss · Pendency registered</strong><span>Closing the pop-up registers a pendency on the TO with package ID, operator ID and timestamp.</span></div>
+        <iframe class="spx-gallery-frame" src="screens/pendency-registered.html?embed=1&amp;v=20261002-1" title="Pendency registered" loading="lazy"></iframe>
+      </article>
+      <article class="spx-gallery-card" data-flow="dismiss">
+        <div class="spx-gallery-label"><strong>4 · Dismiss · Pendency list</strong><span>Tap the Cross-Check row in the TO context to review registered pendencies.</span></div>
+        <iframe class="spx-gallery-frame" src="screens/pendency-list.html?embed=1&amp;v=20261002-1" title="Pendency list" loading="lazy"></iframe>
+      </article>
+      <article class="spx-gallery-card" data-flow="close">
+        <div class="spx-gallery-label"><strong>5 · Close TO · Pendencies · supervisor PIN</strong><span>Complete lists all pendencies and requests the supervisor PIN to release them.</span></div>
+        <iframe class="spx-gallery-frame" src="screens/close-to-pendencies.html?embed=1&amp;v=20261002-1" title="Pendencies · supervisor PIN" loading="lazy"></iframe>
+      </article>
+      <article class="spx-gallery-card" data-flow="close">
+        <div class="spx-gallery-label"><strong>5 · Close TO · Incorrect PIN</strong><span>Wrong PIN is rejected inline; the TO is not packed.</span></div>
+        <iframe class="spx-gallery-frame" src="screens/close-to-pin-error.html?embed=1&amp;v=20261002-1" title="Incorrect PIN" loading="lazy"></iframe>
+      </article>
+      <article class="spx-gallery-card" data-flow="close">
+        <div class="spx-gallery-label"><strong>5 · Close TO · No supervisor · stays Packing</strong><span>Keep Packing closes the sheet; the TO remains in Packing status.</span></div>
+        <iframe class="spx-gallery-frame" src="screens/close-to-kept-packing.html?embed=1&amp;v=20261002-1" title="No supervisor · stays Packing" loading="lazy"></iframe>
+      </article>
+      <article class="spx-gallery-card" data-flow="packed">
+        <div class="spx-gallery-label"><strong>6 · Packed · Packed · no pendency</strong><span>Without pendencies the TO goes straight to Packed.</span></div>
+        <iframe class="spx-gallery-frame" src="screens/to-packed.html?embed=1&amp;v=20261002-1" title="Packed · no pendency" loading="lazy"></iframe>
+      </article>
+      <article class="spx-gallery-card" data-flow="packed">
+        <div class="spx-gallery-label"><strong>6 · Packed · Packed · pendencies released</strong><span>After PIN release, the audit shows how many pendencies were released.</span></div>
+        <iframe class="spx-gallery-frame" src="screens/to-packed-released.html?embed=1&amp;v=20261002-1" title="Packed · pendencies released" loading="lazy"></iframe>
+      </article>
+    </section>
+  </main>
+  <script src="assets/spx-pda-gallery.js?v=20261002-1"></script>
+  <script src="assets/spx-pda-navigation.js?v=20261002-1"></script>
+</body>
+</html>

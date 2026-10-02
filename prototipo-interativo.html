@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cross-Check no Scan · Protótipo Interativo</title>
+  <link rel="stylesheet" href="assets/ssc-mobile-template.css">
+  <link rel="stylesheet" href="assets/spx-pda-preview.css?v=20261002-2">
+</head>
+<body class="cc-harness" data-screen="to-packing-active-print" data-flow="to-packing" data-prototype-state="scan">
+  <div class="cc-harness-layout">
+    <section class="cc-device" aria-label="PDA">
+      <main id="app" class="ssc-mobile-screen spx-pda-page spx-pda-screen-to-packing-active-print" data-archetype="scan-operation" data-template="to-packing" data-state="active-print" data-source-status="provisional"></main>
+      <p class="cc-device-hint">Toque e digite no PDA normalmente — ou use o scanner simulado no painel.</p>
+    </section>
+
+    <aside class="cc-panel" aria-label="Controles do protótipo">
+      <header class="cc-panel-head">
+        <span class="cc-kicker">PDA › Packing › Scan package</span>
+        <h1>Cross-Check no momento do scan</h1>
+        <p>TO <strong data-bind="to"></strong> · destino <strong data-bind="dest"></strong></p>
+      </header>
+
+      <div class="cc-status" aria-live="polite">
+        <div><span>Status da TO</span><strong data-bind="status">Packing</strong></div>
+        <div><span>Pacotes</span><strong data-bind="packages">0</strong></div>
+        <div><span>Pendências</span><strong data-bind="pendencies">0</strong></div>
+      </div>
+
+      <section class="cc-block">
+        <h2>Scanner simulado</h2>
+        <div class="cc-scanner">
+          <button type="button" class="cc-btn is-ok" data-sim="correct"><b>Bipar pacote correto</b><small>Destino = destino da TO</small></button>
+          <button type="button" class="cc-btn is-bad" data-sim="wrong"><b>Bipar pacote errado</b><small>Dispara o pop-up</small></button>
+          <button type="button" class="cc-btn" data-sim="rescan" disabled><b>Re-bipar pacote sinalizado</b><small>Remove da TO, sem pendência</small></button>
+        </div>
+        <p class="cc-tip">No pop-up, o <b>×</b> discreto registra uma pendência. Em <b>Complete</b>, PIN do supervisor: <button type="button" class="cc-pin" data-sim="pin" title="Copiar PIN"></button></p>
+      </section>
+
+      <section class="cc-block">
+        <h2>Etapas do fluxo</h2>
+        <ol class="cc-steps">
+          <li><button type="button" data-step="1" data-load="scan"><i>1</i><span>Scan · destino correto</span></button></li>
+          <li><button type="button" data-step="2" data-load="alert"><i>2</i><span>Pop-up de Cross-Check</span></button></li>
+          <li><button type="button" data-step="3" data-load="removed"><i>3</i><span>Re-scan · correção</span></button></li>
+          <li><button type="button" data-step="4" data-load="pendency"><i>4</i><span>Fechar · pendência</span></button></li>
+          <li><button type="button" data-step="5" data-load="closure"><i>5</i><span>Fechar TO · PIN</span></button></li>
+          <li><button type="button" data-step="6" data-load="packed"><i>6</i><span>Packed</span></button></li>
+        </ol>
+      </section>
+
+      <section class="cc-block cc-log-block">
+        <div class="cc-log-head"><h2>Log de eventos</h2><button type="button" class="cc-link" data-sim="reset">Reiniciar TO</button></div>
+        <ol class="cc-log" data-bind="log"></ol>
+      </section>
+
+      <a class="cc-link cc-gallery-link" href="index.html">Ver todos os estados em galeria →</a>
+    </aside>
+  </div>
+
+  <script>window.SpxPdaNavigation = { mount() {}, screens: [] };</script>
+  <script src="assets/spx-pda-template.js?v=20261002-2"></script>
+  <script src="assets/spx-pda-cross-check.js?v=20261002-2"></script>
+  <script src="assets/cross-check-harness.js?v=20261002-2"></script>
+</body>
+</html>

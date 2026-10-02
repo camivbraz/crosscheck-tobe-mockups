@@ -1,0 +1,9 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="360" height="290" viewBox="0 0 360 290" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path id="app bar bg" fill-rule="evenodd" clip-rule="evenodd" d="M360 0H0V290H360V0Z" fill="url(#paint0_linear_0_284)"/>
+<defs>
+<linearGradient id="paint0_linear_0_284" x1="180" y1="0" x2="180" y2="290" gradientUnits="userSpaceOnUse">
+<stop stop-color="#F5FFF7"/>
+<stop offset="1" stop-color="#F3F5F8" stop-opacity="0"/>
+</linearGradient>
+</defs>
+</svg>
