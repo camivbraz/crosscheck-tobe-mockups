@@ -244,19 +244,27 @@
 
   const alertDialog = () => {
     const { id, destination } = model.alert;
+    const resolving = Boolean(model.alert.resolving);
+    const alertTitle = resolving ? "Cross-Check Pendency" : "Wrong Destination";
+    const alertCopy = resolving
+      ? "This package is in the TO with a pendency. Re-scan it to take it out \u2014 no supervisor release needed."
+      : "This package does not belong to this TO. Keep it out of the bag and re-scan it to remove it.";
+    const alertHelper = resolving
+      ? "Scan the same package again to clear the pendency."
+      : "Scan the same package again to confirm removal.";
     return `<div class="spx-overlay" data-component="Modal" data-cc-overlay="alert">
       <section class="spx-dialog is-cross-check" data-component="Dialog" data-module="CrossCheckAlert" role="alertdialog" aria-labelledby="cc-alert-title" aria-describedby="cc-alert-copy">
         <button class="spx-cc-dismiss" type="button" data-component="Button" data-action="dismiss-alert" aria-label="Close and register pendency">${icon("IconCloseOutline", 20)}</button>
         <div class="spx-dialog-content">
           ${icon("IconFailedColored", 48)}
           <div class="spx-dialog-message">
-            <h2 class="spx-dialog-title" id="cc-alert-title">Wrong Destination</h2>
-            <p class="spx-dialog-description" id="cc-alert-copy">This package does not belong to this TO. Keep it out of the bag and re-scan it to remove it.</p>
+            <h2 class="spx-dialog-title" id="cc-alert-title">${alertTitle}</h2>
+            <p class="spx-dialog-description" id="cc-alert-copy">${alertCopy}</p>
           </div>
           ${comparison(id, destination)}
           <div class="spx-cc-rescan">
             ${scanInput("Re-scan SPX TN", { name: "rescan", hideMethod: true, value: model.alertError ? "BR2610027345158" : "" })}
-            <p class="spx-cc-helper${model.alertError ? " is-error" : ""}" role="${model.alertError ? "alert" : "note"}">${model.alertError || "Scan the same package again to confirm removal."}</p>
+            <p class="spx-cc-helper${model.alertError ? " is-error" : ""}" role="${model.alertError ? "alert" : "note"}">${model.alertError || alertHelper}</p>
           </div>
         </div>
       </section>
@@ -265,17 +273,18 @@
 
   const removedDialog = () => {
     const { id } = model.alert;
+    const resolving = Boolean(model.alert.resolving);
     return `<div class="spx-overlay" data-component="Modal" data-cc-overlay="removed">
       <section class="spx-dialog is-cross-check is-cross-check-resolved" data-component="Dialog" data-module="CrossCheckCorrection" role="alertdialog" aria-labelledby="cc-removed-title">
         <div class="spx-dialog-content">
           ${icon("IconSuccessColored", 48)}
           <div class="spx-dialog-message">
-            <h2 class="spx-dialog-title" id="cc-removed-title">Package Removed from TO</h2>
-            <p class="spx-dialog-description"><strong>${id}</strong> did not enter ${TO_NUMBER}. Return it to the conveyor.</p>
+            <h2 class="spx-dialog-title" id="cc-removed-title">${resolving ? "Pendency Cleared" : "Package Removed from TO"}</h2>
+            <p class="spx-dialog-description"><strong>${id}</strong> ${resolving ? `was taken out of ${TO_NUMBER} and its pendency is cleared` : `did not enter ${TO_NUMBER}`}. Return it to the conveyor.</p>
           </div>
           <div class="spx-cc-compare">
-            ${listCell("TO Status", "Not added")}
-            ${listCell("Pendency", "None registered")}
+            ${listCell("TO Status", resolving ? "Removed" : "Not added")}
+            ${listCell("Pendency", resolving ? "Cleared" : "None registered")}
           </div>
         </div>
         <div class="spx-dialog-actions">${button("OK, Back to Scanning", { primary: true, action: "close-removed" })}</div>
@@ -297,7 +306,7 @@
       <section class="spx-bottom-sheet is-cross-check-sheet" data-component="BottomSheet" data-module="CrossCheckPendencyList" role="dialog" aria-labelledby="cc-pendency-title">
         <header class="spx-sheet-header"><h2 class="spx-sheet-title" id="cc-pendency-title">Cross-Check Pendencies (${model.pendencies.length})</h2><button class="ssc-navbar-action" data-component="Button" data-action="close-overlay" aria-label="Close">${icon("IconCloseOutline", 24)}</button></header>
         <div class="spx-sheet-body">
-          <p class="spx-cc-sheet-note">Released by a supervisor PIN when the TO is closed.</p>
+          <p class="spx-cc-sheet-note">Re-scan a package to take it out and clear its pendency. A supervisor release is only needed for what is left when the TO is closed.</p>
           ${model.pendencies.map(pendencyCard).join("")}
         </div>
       </section>
@@ -451,7 +460,25 @@ ${model.emailError ? `<span class="spx-cc-helper is-error" id="cc-email-helper">
     if (model.overlay) return;
     const time = timestamp();
 
-    if (model.packages.some((item) => item.id === id)) {
+    const existing = model.packages.find((item) => item.id === id);
+    if (existing) {
+      if (existing.pendency) {
+        // A dismissed package stays in the TO carrying a pendency. Re-scanning it
+        // reopens the Cross-Check dialog so the operator can remove it on their own,
+        // mirroring the re-scan path that resolves 96.31% of cases at TO closure today.
+        const registered = model.pendencies.find((entry) => entry.id === id);
+        model.alert = {
+          id,
+          destination: (registered && registered.destination) || wrongDestinations[id],
+          time,
+          resolving: true
+        };
+        model.alertError = "";
+        model.feedback = { state: "error", message: "Cross-Check pendency \u00b7 Re-scan to remove", detail: `${id} at ${time.slice(11)}` };
+        model.overlay = "alert";
+        model.toast = null;
+        return render();
+      }
       model.feedback = { state: "success", message: "Already in this TO.", detail: `${id} at ${time}` };
       return render();
     }
@@ -478,15 +505,33 @@ ${model.emailError ? `<span class="spx-cc-helper is-error" id="cc-email-helper">
       model.alertError = `This is not the flagged package. Scan ${flagged} to confirm.`;
       return render("rescan");
     }
+    const resolving = Boolean(model.alert.resolving);
+    if (resolving) {
+      // Removing the package also clears its pendency: no supervisor release needed.
+      model.packages = model.packages.filter((item) => item.id !== flagged);
+      model.pendencies = model.pendencies.filter((entry) => entry.id !== flagged);
+    }
     model.removed.push(flagged);
     model.alertError = "";
-    model.feedback = { state: "error", message: "Not added to TO · Return to conveyor", detail: `${flagged} at ${timestamp().slice(11)}` };
+    model.feedback = {
+      state: "error",
+      message: resolving ? "Pendency cleared \u00b7 Return to conveyor" : "Not added to TO \u00b7 Return to conveyor",
+      detail: `${flagged} at ${timestamp().slice(11)}`
+    };
     model.overlay = "removed";
     render();
   };
 
   const dismissAlert = () => {
     const { id, destination } = model.alert;
+    if (model.alert.resolving) {
+      // Reopened from an existing pendency: closing again just leaves it as it was.
+      model.overlay = null;
+      model.alert = null;
+      model.alertError = "";
+      showToast("IconNoticeColored", "Pendency kept on the TO");
+      return render();
+    }
     const entry = { id, destination, operator: OPERATOR_ID, time: timestamp() };
     model.pendencies.unshift(entry);
     model.packages.unshift({ id, pendency: true });
