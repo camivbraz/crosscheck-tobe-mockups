@@ -93,9 +93,9 @@
     },
     removed() {
       model.removed = ["BR2610029981046"];
-      model.alert = { id: "BR2610029981046", destination: wrongDestinations.BR2610029981046, time: fixedTime(32, 8) };
-      model.feedback = { state: "error", message: "Not added to TO · Return to conveyor", detail: "BR2610029981046 at 14:32:15" };
-      model.overlay = "removed";
+      model.feedback = { state: "error", message: "Not added to TO \u00b7 Return to conveyor", detail: "BR2610029981046 at 14:32:15" };
+      model.toast = { icon: "IconSuccessColored", text: "Package not added to TO" };
+      model.toastSticky = true;
     },
     pendency() {
       model.pendencies = [pendencyOne];
@@ -271,27 +271,6 @@
     </div>`;
   };
 
-  const removedDialog = () => {
-    const { id } = model.alert;
-    const resolving = Boolean(model.alert.resolving);
-    return `<div class="spx-overlay" data-component="Modal" data-cc-overlay="removed">
-      <section class="spx-dialog is-cross-check is-cross-check-resolved" data-component="Dialog" data-module="CrossCheckCorrection" role="alertdialog" aria-labelledby="cc-removed-title">
-        <div class="spx-dialog-content">
-          ${icon("IconSuccessColored", 48)}
-          <div class="spx-dialog-message">
-            <h2 class="spx-dialog-title" id="cc-removed-title">${resolving ? "Pendency Cleared" : "Package Removed from TO"}</h2>
-            <p class="spx-dialog-description"><strong>${id}</strong> ${resolving ? `was taken out of ${TO_NUMBER} and its pendency is cleared` : `did not enter ${TO_NUMBER}`}. Return it to the conveyor.</p>
-          </div>
-          <div class="spx-cc-compare">
-            ${listCell("TO Status", resolving ? "Removed" : "Not added")}
-            ${listCell("Pendency", resolving ? "Cleared" : "None registered")}
-          </div>
-        </div>
-        <div class="spx-dialog-actions">${button("OK, Back to Scanning", { primary: true, action: "close-removed" })}</div>
-      </section>
-    </div>`;
-  };
-
   const pendencyCard = (entry) => `
     <article class="spx-cc-pendency" data-module="CrossCheckPendency">
       <div class="spx-cc-pendency-head">
@@ -345,7 +324,6 @@ ${model.emailError ? `<span class="spx-cc-helper is-error" id="cc-email-helper">
 
   const overlayMarkup = () => {
     if (model.overlay === "alert") return alertDialog();
-    if (model.overlay === "removed") return removedDialog();
     if (model.overlay === "pendency-sheet") return pendencySheet();
     if (model.overlay === "closure") return closureSheet();
     return "";
@@ -513,13 +491,18 @@ ${model.emailError ? `<span class="spx-cc-helper is-error" id="cc-email-helper">
     }
     model.removed.push(flagged);
     model.alertError = "";
+    model.alert = null;
+    // No confirmation screen: the operator is wearing gloves and must not have to
+    // touch the PDA beyond the trigger (Ariane, OpEx, 05/10). The scan itself closes
+    // the dialog and the result is reported by the inline banner + toast.
+    model.overlay = null;
     model.feedback = {
       state: "error",
       message: resolving ? "Pendency cleared \u00b7 Return to conveyor" : "Not added to TO \u00b7 Return to conveyor",
       detail: `${flagged} at ${timestamp().slice(11)}`
     };
-    model.overlay = "removed";
-    render();
+    showToast("IconSuccessColored", resolving ? "Pendency cleared" : "Package not added to TO");
+    render("scan");
   };
 
   const dismissAlert = () => {
@@ -613,11 +596,6 @@ ${model.emailError ? `<span class="spx-cc-helper is-error" id="cc-email-helper">
       confirmRescan((input && input.value.trim().toUpperCase()) || model.alert.id);
     },
     "dismiss-alert": dismissAlert,
-    "close-removed": () => {
-      model.overlay = null;
-      model.alert = null;
-      render();
-    },
     "open-pendencies": () => {
       clearTransient();
       model.toast = null;
