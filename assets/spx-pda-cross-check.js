@@ -12,7 +12,7 @@
   const TO_NUMBER = "TO2026100210B4K";
   const TO_DESTINATION = "Campinas Hub";
   const OPERATOR_ID = "BR-OP-10482";
-  const SUPERVISOR_PIN = "246810";
+  const SUPERVISOR_PIN = "2023"; // station-level Packing PIN (4 digits), set in the station config
 
   // Packages that do not belong to the TO destination.
   const wrongDestinations = {
@@ -99,14 +99,13 @@
     },
     pendency() {
       model.pendencies = [pendencyOne];
-      model.packages.unshift({ id: pendencyOne.id, pendency: true });
       model.feedback = { state: "error", message: "Cross-Check pendency registered", detail: `${pendencyOne.id} at 14:32:08` };
       model.toast = { icon: "IconNoticeColored", text: "Pendency registered to TO" };
       model.toastSticky = true;
     },
     "pendency-sheet"() {
       model.pendencies = [pendencyTwo, pendencyOne];
-      model.packages = [{ id: pendencyTwo.id, pendency: true }, { id: "BR2610027345158" }, { id: pendencyOne.id, pendency: true }].concat(basePackages());
+      model.packages = [{ id: "BR2610027345158" }].concat(basePackages());
       model.overlay = "pendency-sheet";
     },
     closure() {
@@ -116,8 +115,8 @@
     "closure-error"() {
       seeds.closure();
       model.emailValue = "supervisor.sp6@shopee.com";
-      model.pinValue = "135790";
-      model.pinError = "Incorrect supervisor PIN. Try again.";
+      model.pinValue = "1392";
+      model.pinError = "Incorrect Packing PIN. Try again.";
     },
     "kept-packing"() {
       seeds["pendency-sheet"]();
@@ -247,10 +246,10 @@
     const resolving = Boolean(model.alert.resolving);
     const alertTitle = resolving ? "Cross-Check Pendency" : "Wrong Destination";
     const alertCopy = resolving
-      ? "This package is in the TO with a pendency. Re-scan it to take it out \u2014 no supervisor release needed."
-      : "This package does not belong to this TO. Keep it out of the bag and re-scan it to remove it.";
+      ? "This package was not added to the TO \u2014 only the occurrence was registered. Re-scan it to confirm it is out and clear the pendency."
+      : "This package belongs to another sorting plan and was not added to this TO. Keep it out of the bag and re-scan it to confirm.";
     const alertHelper = resolving
-      ? "Scan the same package again to clear the pendency."
+      ? "Scan the same package again to confirm it is out and clear the pendency."
       : "Scan the same package again to confirm removal.";
     return `<div class="spx-overlay" data-component="Modal" data-cc-overlay="alert">
       <section class="spx-dialog is-cross-check" data-component="Dialog" data-module="CrossCheckAlert" role="alertdialog" aria-labelledby="cc-alert-title" aria-describedby="cc-alert-copy">
@@ -285,7 +284,7 @@
       <section class="spx-bottom-sheet is-cross-check-sheet" data-component="BottomSheet" data-module="CrossCheckPendencyList" role="dialog" aria-labelledby="cc-pendency-title">
         <header class="spx-sheet-header"><h2 class="spx-sheet-title" id="cc-pendency-title">Cross-Check Pendencies (${model.pendencies.length})</h2><button class="ssc-navbar-action" data-component="Button" data-action="close-overlay" aria-label="Close">${icon("IconCloseOutline", 24)}</button></header>
         <div class="spx-sheet-body">
-          <p class="spx-cc-sheet-note">Re-scan a package to take it out and clear its pendency. A supervisor release is only needed for what is left when the TO is closed.</p>
+          <p class="spx-cc-sheet-note">None of these packages entered the TO \u2014 the occurrence is recorded for conference only. Re-scan a package to confirm it is out and clear its pendency. What is left when the TO is closed needs a supervisor acknowledgement.</p>
           ${model.pendencies.map(pendencyCard).join("")}
         </div>
       </section>
@@ -299,12 +298,12 @@
 
   const closureSheet = () => {
     const count = model.pendencies.length;
-    const ready = model.pinValue.length === 6 && /.+@.+\..+/.test(model.emailValue);
+    const ready = model.pinValue.length === 4 && /.+@.+\..+/.test(model.emailValue);
     return `<div class="spx-overlay" data-component="Modal" data-cc-overlay="closure">
       <section class="spx-bottom-sheet is-cross-check-sheet is-closure" data-component="BottomSheet" data-module="TOClosurePendencyRelease" role="dialog" aria-labelledby="cc-closure-title">
         <header class="spx-sheet-header"><h2 class="spx-sheet-title" id="cc-closure-title">Close TO</h2><button class="ssc-navbar-action" data-component="Button" data-action="keep-packing" aria-label="Close">${icon("IconCloseOutline", 24)}</button></header>
         <div class="spx-sheet-body">
-          <div class="spx-cc-banner" role="note">${icon("IconInfoOutline", 16)}<span>${count} Cross-Check ${count === 1 ? "pendency" : "pendencies"} need supervisor release before this TO can be packed.</span></div>
+          <div class="spx-cc-banner" role="note">${icon("IconInfoOutline", 16)}<span>${count} Cross-Check ${count === 1 ? "pendency" : "pendencies"} not confirmed as physically removed. A supervisor must acknowledge before this TO can be packed.</span></div>
           <div class="spx-cc-pendency-rows">${model.pendencies.map(pendencyRow).join("")}</div>
           <label class="spx-cc-pin" data-component="Input">
             <span class="spx-cc-pin-label">Supervisor email<span class="spx-required">*</span></span>
@@ -312,12 +311,12 @@
 ${model.emailError ? `<span class="spx-cc-helper is-error" id="cc-email-helper">${model.emailError}</span>` : ""}
           </label>
           <label class="spx-cc-pin" data-component="Input">
-            <span class="spx-cc-pin-label">Supervisor PIN<span class="spx-required">*</span></span>
-            <input class="spx-cc-pin-input${model.pinError ? " is-error" : ""}" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="off" placeholder="Enter 6-digit PIN" data-input="pin" value="${model.pinValue}" aria-invalid="${model.pinError ? "true" : "false"}" aria-describedby="cc-pin-helper">
-            <span class="spx-cc-helper${model.pinError ? " is-error" : ""}" id="cc-pin-helper">${model.pinError || "No supervisor on shift? Keep Packing — the TO stays in Packing."}</span>
+            <span class="spx-cc-pin-label">Packing PIN<span class="spx-required">*</span></span>
+            <input class="spx-cc-pin-input${model.pinError ? " is-error" : ""}" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="off" placeholder="Enter 4-digit PIN" data-input="pin" value="${model.pinValue}" aria-invalid="${model.pinError ? "true" : "false"}" aria-describedby="cc-pin-helper">
+            <span class="spx-cc-helper${model.pinError ? " is-error" : ""}" id="cc-pin-helper">${model.pinError || "The station Packing PIN. No supervisor on shift? Keep Packing — the TO stays in Packing."}</span>
           </label>
         </div>
-        <div class="spx-sheet-actions">${button("Keep Packing", { neutral: true, action: "keep-packing" })}${button("Release & Pack", { primary: true, action: "release", disabled: !ready })}</div>
+        <div class="spx-sheet-actions">${button("Keep Packing", { neutral: true, action: "keep-packing" })}${button("Acknowledge & Pack", { primary: true, action: "release", disabled: !ready })}</div>
       </section>
     </div>`;
   };
@@ -360,7 +359,7 @@ ${model.emailError ? `<span class="spx-cc-helper is-error" id="cc-email-helper">
 
   const resultScreen = () => {
     setShell("task-result", "to-packing", "result-feedback-page");
-    const crossCheck = model.released ? `${model.released} ${model.released === 1 ? "pendency" : "pendencies"} released` : "No pendency";
+    const crossCheck = model.released ? `${model.released} ${model.released === 1 ? "pendency" : "pendencies"} acknowledged` : "No pendency";
     const audit = [
       ["Receiver", TO_DESTINATION],
       ["TO Pack", "Nylon Bag"],
@@ -438,32 +437,36 @@ ${model.emailError ? `<span class="spx-cc-helper is-error" id="cc-email-helper">
     if (model.overlay) return;
     const time = timestamp();
 
-    const existing = model.packages.find((item) => item.id === id);
-    if (existing) {
-      if (existing.pendency) {
-        // A dismissed package stays in the TO carrying a pendency. Re-scanning it
-        // reopens the Cross-Check dialog so the operator can remove it on their own,
-        // mirroring the re-scan path that resolves 96.31% of cases at TO closure today.
-        const registered = model.pendencies.find((entry) => entry.id === id);
-        model.alert = {
-          id,
-          destination: (registered && registered.destination) || wrongDestinations[id],
-          time,
-          resolving: true
-        };
-        model.alertError = "";
-        model.feedback = { state: "error", message: "Cross-Check pendency \u00b7 Re-scan to remove", detail: `${id} at ${time.slice(11)}` };
-        model.overlay = "alert";
-        model.toast = null;
-        return render();
-      }
+    // A package rejected by Cross-Check never enters the TO (it never reaches
+    // soc_packing). What is registered against the TO is the occurrence, for
+    // conference purposes only -- so a pendency is looked up in model.pendencies,
+    // never in model.packages. (Ariane, OpEx, 06/10.)
+    const registered = model.pendencies.find((entry) => entry.id === id);
+    if (registered) {
+      // Re-scanning a package that carries a pendency reopens the Cross-Check dialog
+      // so the operator can clear it on their own, with no supervisor acknowledgement.
+      model.alert = {
+        id,
+        destination: registered.destination || wrongDestinations[id],
+        time,
+        resolving: true
+      };
+      model.alertError = "";
+      model.feedback = { state: "error", message: "Cross-Check pendency \u00b7 Re-scan to clear", detail: `${id} at ${time.slice(11)}` };
+      model.overlay = "alert";
+      model.toast = null;
+      return render();
+    }
+
+    if (model.packages.some((item) => item.id === id)) {
       model.feedback = { state: "success", message: "Already in this TO.", detail: `${id} at ${time}` };
       return render();
     }
 
     const destination = wrongDestinations[id];
     if (destination) {
-      // Real-time Cross-Check: the package is held out of the TO until it is re-scanned or dismissed.
+      // Real-time Cross-Check: the system already rejects the package, so it never
+      // enters the TO. The dialog only makes the rejection impossible to miss.
       model.alert = { id, destination, time };
       model.alertError = "";
       model.feedback = { state: "error", message: "Cross-Check failed · Not added to TO", detail: `${id} at ${time.slice(11)}` };
@@ -485,8 +488,8 @@ ${model.emailError ? `<span class="spx-cc-helper is-error" id="cc-email-helper">
     }
     const resolving = Boolean(model.alert.resolving);
     if (resolving) {
-      // Removing the package also clears its pendency: no supervisor release needed.
-      model.packages = model.packages.filter((item) => item.id !== flagged);
+      // The package was never in the TO, so there is nothing to remove from it:
+      // the re-scan confirms it did not enter and clears the pendency record.
       model.pendencies = model.pendencies.filter((entry) => entry.id !== flagged);
     }
     model.removed.push(flagged);
@@ -515,9 +518,10 @@ ${model.emailError ? `<span class="spx-cc-helper is-error" id="cc-email-helper">
       showToast("IconNoticeColored", "Pendency kept on the TO");
       return render();
     }
+    // Only the occurrence is registered. The package itself is not added to the TO:
+    // the risk created here is physical (it may be left in the bag), not systemic.
     const entry = { id, destination, operator: OPERATOR_ID, time: timestamp() };
     model.pendencies.unshift(entry);
-    model.packages.unshift({ id, pendency: true });
     model.feedback = { state: "error", message: "Cross-Check pendency registered", detail: `${id} at ${entry.time.slice(11)}` };
     model.overlay = null;
     model.alert = null;
@@ -549,7 +553,7 @@ ${model.emailError ? `<span class="spx-cc-helper is-error" id="cc-email-helper">
     }
     model.emailError = "";
     if (model.pinValue !== SUPERVISOR_PIN) {
-      model.pinError = "Incorrect supervisor PIN. Try again.";
+      model.pinError = "Incorrect Packing PIN. Try again.";
       model.pinValue = "";
       return render("pin");
     }
@@ -638,7 +642,7 @@ ${model.emailError ? `<span class="spx-cc-helper is-error" id="cc-email-helper">
 
     const syncRelease = () => {
       const releaseButton = root.querySelector('[data-action="release"]');
-      if (releaseButton) releaseButton.disabled = !(model.pinValue.length === 6 && /.+@.+\..+/.test(model.emailValue));
+      if (releaseButton) releaseButton.disabled = !(model.pinValue.length === 4 && /.+@.+\..+/.test(model.emailValue));
     };
 
     const emailInput = root.querySelector('[data-input="email"]');
@@ -658,7 +662,7 @@ ${model.emailError ? `<span class="spx-cc-helper is-error" id="cc-email-helper">
       syncRelease();
     });
     pinInput?.addEventListener("keydown", (event) => {
-      if (event.key === "Enter" && model.pinValue.length === 6) release();
+      if (event.key === "Enter" && model.pinValue.length === 4) release();
     });
 
     root.querySelector('[data-input="label"]')?.addEventListener("keydown", (event) => {
