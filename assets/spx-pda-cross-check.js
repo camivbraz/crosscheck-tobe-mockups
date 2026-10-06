@@ -21,6 +21,14 @@
     BR2610029981060: "São José dos Campos Hub"
   };
   const wrongQueue = Object.keys(wrongDestinations);
+
+  const ERROR_CODE = "120206201";
+  const STATION_CODES = {
+    "Campinas Hub": "[HUB-CPS-01] LM Hub_SP_Campinas_1",
+    "Ribeirão Preto Hub": "[HUB-RPR-02] LM Hub_SP_Ribeirao_Preto_2",
+    "Sorocaba Hub": "[HUB-SOR-01] LM Hub_SP_Sorocaba_1",
+    "São José dos Campos Hub": "[HUB-SJC-03] LM Hub_SP_Sao_Jose_dos_Campos_3"
+  };
   let correctSerial = 345151;
 
   const pad = (value) => String(value).padStart(2, "0");
@@ -234,20 +242,22 @@
 
   /* ---------- Overlays ---------- */
 
-  const comparison = (id, destination) => `
-    <div class="spx-cc-compare" data-module="CrossCheckComparison">
-      ${listCell("Package", id)}
-      ${listCell("Package Destination", tag(destination, "error"))}
-      ${listCell("TO Destination", TO_DESTINATION)}
+  // Verbatim wording of the notification the PDA already shows inline today, only
+  // re-delivered as a pop-up. The sentence already names the TO the package cannot
+  // be added to and the sorting plan it belongs to, so which destination is correct
+  // and which is wrong is self-evident without extra labels. (Ariane, OpEx, 06/10.)
+  const notification = (id, destination, time) => `
+    <div class="spx-cc-notification" data-module="CrossCheckNotification">
+      <p>${ERROR_CODE}: Order cannot be added to this TO(${STATION_CODES[TO_DESTINATION]}) because it is in another sorting plan(${STATION_CODES[destination]}) / ${id} at ${time.slice(11)}</p>
     </div>`;
 
   const alertDialog = () => {
-    const { id, destination } = model.alert;
+    const { id, destination, time } = model.alert;
     const resolving = Boolean(model.alert.resolving);
     const alertTitle = resolving ? "Cross-Check Pendency" : "Wrong Destination";
     const alertCopy = resolving
       ? "This package was not added to the TO \u2014 only the occurrence was registered. Re-scan it to confirm it is out and clear the pendency."
-      : "This package belongs to another sorting plan and was not added to this TO. Keep it out of the bag and re-scan it to confirm.";
+      : "Keep this package out of the bag and re-scan it to confirm it is out.";
     const alertHelper = resolving
       ? "Scan the same package again to confirm it is out and clear the pendency."
       : "Scan the same package again to confirm removal.";
@@ -260,7 +270,7 @@
             <h2 class="spx-dialog-title" id="cc-alert-title">${alertTitle}</h2>
             <p class="spx-dialog-description" id="cc-alert-copy">${alertCopy}</p>
           </div>
-          ${comparison(id, destination)}
+          ${notification(id, destination, time)}
           <div class="spx-cc-rescan">
             ${scanInput("Re-scan SPX TN", { name: "rescan", hideMethod: true, value: model.alertError ? "BR2610027345158" : "" })}
             <p class="spx-cc-helper${model.alertError ? " is-error" : ""}" role="${model.alertError ? "alert" : "note"}">${model.alertError || alertHelper}</p>

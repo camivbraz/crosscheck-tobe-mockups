@@ -14,7 +14,7 @@
     { file: "cross-check-removed.html", flow: "3 · Re-scan", label: "Correction confirmed" },
     { file: "pendency-registered.html", flow: "4 · Dismiss", label: "Pendency registered" },
     { file: "pendency-list.html", flow: "4 · Dismiss", label: "Pendency list" },
-    { file: "close-to-pendencies.html", flow: "5 · Close TO", label: "Pendencies · supervisor PIN" },
+    { file: "close-to-pendencies.html", flow: "5 · Close TO", label: "Pendencies · Packing PIN" },
     { file: "close-to-pin-error.html", flow: "5 · Close TO", label: "Incorrect PIN" },
     { file: "close-to-kept-packing.html", flow: "5 · Close TO", label: "No supervisor · stays Packing" },
     { file: "to-packed.html", flow: "6 · Packed", label: "Packed · no pendency" },
@@ -90,7 +90,7 @@
               <span>Scanner simulator</span>
               <button type="button" data-sim="correct">Scan correct package</button>
               <button type="button" data-sim="wrong">Scan wrong-destination package</button>
-              <span>Supervisor PIN <code>${window.CrossCheckPrototype.pin}</code></span>
+              <span>Packing PIN <code>${window.CrossCheckPrototype.pin}</code></span>
             </div>`
           : ""
       }`;

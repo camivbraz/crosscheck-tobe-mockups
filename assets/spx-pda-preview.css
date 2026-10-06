@@ -4671,30 +4671,21 @@ body.spx-preview-with-nav:not(.spx-template-home):not(.spx-gallery-page) {
   opacity: 1;
 }
 
-.spx-cc-compare {
+.spx-cc-notification {
   width: 100%;
   border-radius: 4px;
   padding: 12px;
   background: var(--spx-page);
+  border-left: 3px solid var(--spx-error);
+  text-align: left;
 }
 
-.spx-cc-compare .ssc-list-cell {
-  align-items: center;
-}
-
-.spx-cc-compare .ssc-list-cell + .ssc-list-cell {
-  margin-top: 8px;
-}
-
-.spx-cc-compare .ssc-list-label {
-  flex-basis: 128px;
+.spx-cc-notification p {
+  margin: 0;
   font-size: 13px;
-}
-
-.spx-cc-compare .ssc-list-value {
-  display: flex;
-  justify-content: flex-end;
-  font-size: 14px;
+  line-height: 1.45;
+  color: var(--spx-text);
+  word-break: break-word;
 }
 
 .spx-cc-rescan {
