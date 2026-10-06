@@ -42,7 +42,7 @@
         ? log(`PIN do supervisor liberou ${detail.released} pendência(s) · TO <b>Packed</b>`, "ok")
         : log("Sem pendências · TO fechada direto como <b>Packed</b>", "ok");
     }
-    if (detail.view === "scan" && before.view === "result") return log("TO reaberta para bipagem");
+    if (detail.view === "scan" && before.view === "result") return log("TO reaberta para escaneamento");
     if (detail.overlay === "alert" && before.overlay !== "alert") {
       return log(`Cross-Check: <b>${detail.alertId}</b> não pertence à TO · pop-up exibido`, "bad");
     }
@@ -114,7 +114,7 @@
     logList.innerHTML = "";
     previous = null;
     api.load("scan");
-    log("TO reiniciada · 3 pacotes já bipados");
+    log("TO reiniciada · 3 pacotes já escaneados");
   });
 
   const stepNames = { scan: "Scan", alert: "Pop-up de Cross-Check", removed: "Re-scan · correção", pendency: "Pendência registrada", closure: "Fechar TO com pendências", packed: "Packed" };
@@ -127,5 +127,5 @@
   });
 
   api.refresh();
-  log("Comece bipando um pacote · 3 pacotes já estão na TO");
+  log("Comece escaneando um pacote · 3 pacotes já estão na TO");
 })();
