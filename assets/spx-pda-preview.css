@@ -4918,7 +4918,6 @@ body.spx-preview-with-nav:not(.spx-template-home):not(.spx-gallery-page) {
   width: 36px;
   height: 36px;
   flex: 0 0 36px;
-  background-size: 2.7px 16.2px, 28.8px 28.8px;
 }
 
 /* Preview-only scanner simulator (outside .spx-pda-page). */

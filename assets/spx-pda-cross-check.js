@@ -101,8 +101,10 @@
     },
     removed() {
       model.removed = ["BR2610029981046"];
-      model.feedback = { state: "error", message: "Not added to TO \u00b7 Return to conveyor", detail: "BR2610029981046 at 14:32:15" };
-      model.toast = { icon: "IconSuccessColored", text: "Package not added to TO" };
+      model.toast = {
+        icon: "IconSuccessColored",
+        text: `BR2610029981046 did not enter ${TO_NUMBER}. Return it to the conveyor.`
+      };
       model.toastSticky = true;
     },
     pendency() {
@@ -509,12 +511,14 @@ ${model.emailError ? `<span class="spx-cc-helper is-error" id="cc-email-helper">
     // touch the PDA beyond the trigger (Ariane, OpEx, 05/10). The scan itself closes
     // the dialog and the result is reported by the inline banner + toast.
     model.overlay = null;
-    model.feedback = {
-      state: "error",
-      message: resolving ? "Pendency cleared \u00b7 Return to conveyor" : "Not added to TO \u00b7 Return to conveyor",
-      detail: `${flagged} at ${timestamp().slice(11)}`
-    };
-    showToast("IconSuccessColored", resolving ? "Pendency cleared" : "Package not added to TO");
+    // No inline error banner here: the re-scan is the correct outcome, and a red
+    // banner reads as a failure (Ops, 07/10). The toast carries the wording the
+    // removed confirmation dialog used, which was the part worth keeping.
+    model.feedback = { state: "default" };
+    showToast(
+      "IconSuccessColored",
+      `${flagged} did not enter ${TO_NUMBER}. Return it to the conveyor.${resolving ? " Pendency cleared." : ""}`
+    );
     render("scan");
   };
 
